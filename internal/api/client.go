@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 	"log"
+	"time"
 )
 
-func SendData(ip string, port string, cpu interface{}, memory interface{}, disk interface{}) error {
+func SendData(ip string, port string, apiKey string, cpu interface{}, memory interface{}, disk interface{}) error {
 	payload := Payload{
 		CPU:    cpu,
 		Memory: memory,
@@ -24,7 +24,16 @@ func SendData(ip string, port string, cpu interface{}, memory interface{}, disk 
 	url := fmt.Sprintf("http://%s:%s/receive-data", ip, port)
 
 	for i := 0; i < 5; i++ {
-		resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
+		if err != nil {
+			log.Printf("Attempt %d: Error creating request: %v", i+1, err)
+			return err
+		}
+
+		req.Header.Set("X-API-Key", apiKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Printf("Attempt %d: Error sending data to API: %v", i+1, err)
 		} else {

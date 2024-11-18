@@ -14,6 +14,9 @@ type Config struct {
 		IP   string `toml:"ip"`
 		Port string `toml:"port"`
 	} `toml:"server"`
+	Security struct {
+		APIKey string `toml:"api_key"`
+	} `toml:"security"`
 }
 
 func main() {
@@ -37,7 +40,7 @@ func main() {
 			log.Printf("Error fetching Disk info: %v", err)
 		}
 
-		err = api.SendData(config.Server.IP, config.Server.Port, cpuInfo, memoryInfo, diskInfo)
+		err = api.SendData(config.Server.IP, config.Server.Port, config.Security.APIKey, cpuInfo, memoryInfo, diskInfo)
 		if err != nil {
 			log.Printf("Error sending data to API: %v", err)
 			time.Sleep(5 * time.Second)
